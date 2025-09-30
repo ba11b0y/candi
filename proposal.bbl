@@ -1,0 +1,18 @@
+\begin{thebibliography}{1}
+
+\bibitem{jenner2024gentle}
+Erik Jenner.
+\newblock A gentle introduction to mechanistic anomaly detection.
+\newblock In {\em LessWrong}, 2024.
+
+\bibitem{mallen2023eliciting}
+Alex Mallen, Madeline Brumley, Julia Kharchenko, and Nora Belrose.
+\newblock Eliciting latent knowledge from quirky language models.
+\newblock {\em arXiv preprint arXiv:2312.01037}, 2023.
+
+\bibitem{motwani2024secret}
+Sumeet~Ramesh Motwani, Mikhail Baranchuk, Martin Strohmeier, Vijay Bolina, Philip~HS Torr, Lewis Hammond, and Christian~Schroeder de~Witt.
+\newblock Secret collusion among generative ai agents: Multi-agent deception via steganography.
+\newblock {\em arXiv preprint arXiv:2402.07510}, 2024.
+
+\end{thebibliography}
