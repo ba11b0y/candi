@@ -55,6 +55,8 @@
 % to be able to draw some self-contained figs
 \usepackage{tikz}
 \usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{array}
 
 % Use external bibliography file
 
@@ -66,7 +68,7 @@
 \date{}
 
 % make title bold and 14 pt font (Latex default is non-bold, 16 pt)
-\title{\Large \bf candi: Collusion ANomaly Detection using Interpretability}
+\title{\Large \bf Understanding Privacy Preserving Knowledge in models via Mechanistic Interpretability}
 
 %for single author (just remove % characters)
 \author{
@@ -86,7 +88,7 @@ Virginia Tech
 %-------------------------------------------------------------------------------
 \begin{abstract}
 %-------------------------------------------------------------------------------
-With AI agents gaining popularity, there is a growing concern about the ability of AI agents to circumvent security oversight through secret collusion. Recent work shows that colluding models can embed covert communication strategies undetectable to overseers, and these capabilities grow with model size. While existing detection methods such as monitoring, paraphrasing, and parameter optimization are not effective, mechanistic anomaly detection (MAD) offers a promising approach. We propose to use mechanistic anomaly detection and interpretability to detect secret collusion and build a comprehensive evaluation framework for multi-agent settings. Our approach leverages patterns in neural network activations to track true model behavior even when outputs are colluding, providing a principled path toward detecting and preventing collusion that bypasses traditional defenses.
+Large Language Models (LLMs) have become increasingly capable of performing complex tasks over time. This has led to their widespread integration across diverse fields such as coding, education, legal assistance, and even customer support in the form of AI agents. With their increased adoption, they now have access to vast amounts of data, including sensitive information. Previous research \cite{cywinski2025towards} has shown that certain white-box approaches like mechanistic interpretability can be used to elicit latent knowledge from them. Most work, however, uses model organisms\cite{marks2025auditing} where these LLMs are specifically trained to hold secrets, while in real-world scenarios, these LLMs are not explicitly trained to hold secrets but are instead trained with alignment and privacy-preserving techniques post-training.
 \end{abstract}
 
 
@@ -94,33 +96,67 @@ With AI agents gaining popularity, there is a growing concern about the ability 
 \section{Problem Definition}
 %-------------------------------------------------------------------------------
 
-With AI agents gaining popularity, there is a growing concern about the ability of AI agents to circumvent security oversight.
-Recent work \cite{motwani2024secret} shows that colluding models can embed covert communication strategies undetectable to overseers.
-The work also ascertained that as models grow larger, the capabilities of the colluding models to perform secret collusion also grow.
-While these findings establish the problem, the work does not provide a strong methodology to detect secret collusion.
-Existing methods to detect secret collusion such as monitoring, paraphrasing, and parameter optimization, are not effective.
-While mechanistic anomaly detection (MAD) is a promising approach to detect secret collusion, it has mostly been used to detect backdoors \cite{jenner2024gentle}.
-
+TODO: Add a more solid problem definition.
 %-------------------------------------------------------------------------------
 \section{Proposed Method}
 %-------------------------------------------------------------------------------
 
-Mallen et al. \cite{mallen2023eliciting} in their work have shown that patterns in neural network's activations can track the true
-behavior of the model even when the model's output is hard to verify or in our case colluding.
-We propose to use mechanistic anomaly detection (MAD) and interpretability in general to detect secret collusion
-and build a comprehensive evaluation framework to detect secret collusion in multi-agent settings.
+This project aims to study the privacy-preserving properties of LLMs with a real-world application in mind. The idea is to simulate a post-training scenario where a toy language model is trained on a dataset of text to redact PII and then use some \textit{Mechanistic Interpretability} techniques such as activation analysis (where top activation neurons are examined) and circuit analysis (where a combination of neurons in a vector subspace are analyzed) to see if the model still elicits the PII even after being trained to redact it.
+
+\subsection*{Dataset}
+The project aims to build on a subset of the \textbf{AI4Privacy PII Masking Dataset}\cite{ai4privacy_2024}. The dataset contains a large number of text records with PII masked and a sample record from the dataset is shown in Table \ref{table:sample_record}. The dataset is structured as follows:
+\begin{itemize}
+  \item \texttt{source\_text}: raw text with embedded PII,
+  \item \texttt{target\_text}: masked text with placeholders (e.g., [USERNAME], [TIME]),
+  \item \texttt{privacy\_mask} and \texttt{span\_labels}: span-level annotations,
+  \item \texttt{mberttokens} and \texttt{BIO labels} for sequence tagging.
+\end{itemize}
+
+\begin{table}[h!]
+  \centering
+  \begin{tabular}{|l|p{0.7\columnwidth}|}
+    \hline
+    \textbf{Column} & \textbf{Sample Entry} \\
+    \hline
+    source\_text & Subject: Group Messaging for Admissions Process - Good morning, everyone. Users: \textcolor{red}{wynqvrh053}, \textcolor{red}{luka.burg}, \textcolor{red}{qahil.wittauer}, \textcolor{red}{gholamhossein.ruschke}, \textcolor{red}{pdmjrsyoz1460}. Times: \textcolor{blue}{10:20am}, \textcolor{blue}{21}, \textcolor{blue}{quarter past 13}, \textcolor{blue}{9:47 PM} \\
+    \hline
+    target\_text & Subject: Group Messaging for Admissions Process - Good morning, everyone. Users: [\textcolor{red}{USERNAME}], [\textcolor{red}{USERNAME}], [\textcolor{red}{USERNAME}], [\textcolor{red}{USERNAME}], [\textcolor{red}{USERNAME}]. Times: [\textcolor{blue}{TIME}], [\textcolor{blue}{TIME}], [\textcolor{blue}{TIME}], [\textcolor{blue}{TIME}] \\
+    \hline
+    privacy\_mask & [{"value": "wynqvrh053", "start": 287, "end": 297, "label": "USERNAME"}, {"value": "10:20am", "start": 311, "end": 318, "label": "TIME"}, ...] \\
+    \hline
+    span\_labels & [[440, 453, "USERNAME"], [430, 437, "TIME"], [395, 416, "USERNAME"], ...] \\
+    \hline
+    mbert\_text\_tokens & ["Sub", "\#ject", ":", "Group", "Mess", "\#aging", ..., "\#60"] \\
+    \hline
+    mbert\_bio\_labels & ["O", "O", ..., "B-USERNAME", "I-USERNAME"] \\
+    \hline
+    id & 40767A \\
+    \hline
+    language & English \\
+    \hline
+    set & train \\
+    \hline
+  \end{tabular}
+  \caption{An example record from the PII dataset with sensitive fields highlighted.}
+  \label{table:sample_record}
+\end{table}
+
+\subsection*{Training}
+We plan to train a small open-source model (e.g., \texttt{Gemma-2b-it}\cite{gemma_2b_it}) using parameter-efficient fine-tuning such as LoRA\cite{hu2022lora} or PEFT\cite{peft_huggingface} on PII-masking pairs to learn structured redaction. To ensure the model training is computationally feasible, we tested fine-tuning the model on a dummy dataset as part of the Intro to Deep Learning course by MIT (the collab notebook is available at \cite{llm_finetuning_mit}).
 
 %-------------------------------------------------------------------------------
 \section{Timeline}
 %-------------------------------------------------------------------------------
 
-\begin{itemize}
-    \item Week 1: Reproduce the results of the paper \cite{motwani2024secret} in a multi-agent setting with open-source models and collect conversation transcripts of the colluding models.
-    \item Week 2: Set up instrumentation to collect internal activations and attention patterns in both colluding and regular scenarios.
-    \item Week 3: Apply mechanistic anomaly detection (clustering, PCA, probing) to find distinguishing features of collusion.
-    \item Week 4: Evaluate the proposed method and setup a comprehensive evaluation framework.
-    \item Week 5: Draft all findings in a report.
-\end{itemize}
+\begin{center}
+  \begin{tabular}{p{0.25\columnwidth}p{0.7\columnwidth}}
+    \textbf{Week 1–2:} & Literature review on PII masking and fine-tuning LLMs.\\
+    \textbf{Week 3–4:} & Dataset preprocessing and LoRA baseline fine-tuning on the subset of the dataset.\\
+    \textbf{Week 5–6:} & Begin activation analysis using logit lens and then circuit analysis.\\
+    \textbf{Week 7–8:} & Conduct experiments and analyze the results.\\
+    \textbf{Week 9:} & Write final report and prepare reproducible code repository.\\
+  \end{tabular}
+\end{center}
 
 
 \bibliographystyle{plain}

@@ -1,18 +1,31 @@
 \begin{thebibliography}{1}
 
-\bibitem{jenner2024gentle}
-Erik Jenner.
-\newblock A gentle introduction to mechanistic anomaly detection.
-\newblock In {\em LessWrong}, 2024.
+\bibitem{ai4privacy_2024}
+Ai4Privacy.
+\newblock pii-masking-300k (revision 86db63b), 2024.
 
-\bibitem{mallen2023eliciting}
-Alex Mallen, Madeline Brumley, Julia Kharchenko, and Nora Belrose.
-\newblock Eliciting latent knowledge from quirky language models.
-\newblock {\em arXiv preprint arXiv:2312.01037}, 2023.
+\bibitem{cywinski2025towards}
+Bartosz Cywi{\'n}ski, Emil Ryd, Senthooran Rajamanoharan, and Neel Nanda.
+\newblock Towards eliciting latent knowledge from llms with mechanistic interpretability.
+\newblock {\em arXiv preprint arXiv:2505.14352}, 2025.
 
-\bibitem{motwani2024secret}
-Sumeet~Ramesh Motwani, Mikhail Baranchuk, Martin Strohmeier, Vijay Bolina, Philip~HS Torr, Lewis Hammond, and Christian~Schroeder de~Witt.
-\newblock Secret collusion among generative ai agents: Multi-agent deception via steganography.
-\newblock {\em arXiv preprint arXiv:2402.07510}, 2024.
+\bibitem{gemma_2b_it}
+Gemma 2b instruction tuned model on hugging face, 2025.
+
+\bibitem{hu2022lora}
+Edward~J Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu~Wang, Weizhu Chen, et~al.
+\newblock Lora: Low-rank adaptation of large language models.
+\newblock {\em ICLR}, 1(2):3, 2022.
+
+\bibitem{llm_finetuning_mit}
+Llm finetuning on mit deep learning course, 2025.
+
+\bibitem{marks2025auditing}
+Samuel Marks, Johannes Treutlein, Trenton Bricken, Jack Lindsey, Jonathan Marcus, Siddharth Mishra-Sharma, Daniel Ziegler, Emmanuel Ameisen, Joshua Batson, Tim Belonax, et~al.
+\newblock Auditing language models for hidden objectives.
+\newblock {\em arXiv preprint arXiv:2503.10965}, 2025.
+
+\bibitem{peft_huggingface}
+Peft on hugging face, 2025.
 
 \end{thebibliography}
