@@ -102,7 +102,7 @@ This project aims to study the privacy-preserving properties of LLMs with a real
 
 \begin{figure*}[!h]
   \centering
-  \includegraphics[width=0.95\textwidth]{high-level.jpg}
+  \includegraphics[width=0.95\textwidth]{diagram.jpg}
   \caption{High-level overview of the proposed methodology}
   \label{fig:high_level_overview}
 \end{figure*}
@@ -147,13 +147,6 @@ The project aims to build on a subset of the \textbf{AI4Privacy PII Masking Data
 
 \subsection*{Training}
 We plan to train a small open-source model (e.g., \texttt{Gemma-2b-it}\cite{gemma_2b_it}) using parameter-efficient fine-tuning such as LoRA\cite{hu2022lora} on PII-masking pairs to learn structured redaction. To ensure the model training is computationally feasible, we tested fine-tuning the model on a dummy dataset as part of the Intro to Deep Learning course by MIT (the collab notebook is available at \cite{llm_finetuning_mit}).
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.7\textwidth]{diagram.jpg}
-    \caption{Experiment Illustration}
-    \label{fig:training_example}
-\end{figure}
 
 %-------------------------------------------------------------------------------
 \section{Timeline}
