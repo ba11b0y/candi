@@ -101,7 +101,7 @@ TODO: Add a more solid problem definition.
 \section{Proposed Method}
 %-------------------------------------------------------------------------------
 
-This project aims to study the privacy-preserving properties of LLMs with a real-world application in mind. The idea is to simulate a post-training scenario where a toy language model is trained on a dataset of text to redact PII and then use some \textit{Mechanistic Interpretability} techniques such as activation analysis (where top activation neurons are examined) and circuit analysis (where a combination of neurons in a vector subspace are analyzed) to see if the model still elicits the PII even after being trained to redact it.
+This project aims to study the privacy-preserving properties of LLMs with a real-world application in mind. The idea is to simulate a post-training scenario where a chosen language model is trained on a dataset of text to redact PII (Personally Identifiable Information) and then use techniques from \textit{Mechanistic Interpretability} such as activation analysis (where top activation neurons are examined) and circuit analysis (where a combination of neurons in a vector subspace are analyzed) to see if the model still elicits the PII even after being trained to redact it.
 
 \subsection*{Dataset}
 The project aims to build on a subset of the \textbf{AI4Privacy PII Masking Dataset}\cite{ai4privacy_2024}. The dataset contains a large number of text records with PII masked and a sample record from the dataset is shown in Table \ref{table:sample_record}. The dataset is structured as follows:
