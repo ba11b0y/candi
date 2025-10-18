@@ -93,16 +93,19 @@ Large Language Models (LLMs) have become increasingly capable of performing comp
 \end{abstract}
 
 
-%-------------------------------------------------------------------------------
-\section{Problem Definition}
-%-------------------------------------------------------------------------------
-
-TODO: Add a more solid problem definition.
+%------------------------------------------------------------------------------
 %-------------------------------------------------------------------------------
 \section{Proposed Method}
 %-------------------------------------------------------------------------------
 
 This project aims to study the privacy-preserving properties of LLMs with a real-world application in mind. The idea is to simulate a post-training scenario where a chosen language model is trained on a dataset of text to redact PII (Personally Identifiable Information) and then use techniques from \textit{Mechanistic Interpretability} such as activation analysis (where top activation neurons are examined) and circuit analysis (where a combination of neurons in a vector subspace are analyzed) to see if the model still elicits the PII even after being trained to redact it.
+
+\begin{figure*}[!h]
+  \centering
+  \includegraphics[width=0.95\textwidth]{high-level.jpg}
+  \caption{High-level overview of the proposed methodology}
+  \label{fig:high_level_overview}
+\end{figure*}
 
 \subsection*{Dataset}
 The project aims to build on a subset of the \textbf{AI4Privacy PII Masking Dataset}\cite{ai4privacy_2024}. The dataset contains a large number of text records with PII masked and a sample record from the dataset is shown in Table \ref{table:sample_record}. The dataset is structured as follows:
@@ -143,7 +146,7 @@ The project aims to build on a subset of the \textbf{AI4Privacy PII Masking Data
 \end{table}
 
 \subsection*{Training}
-We plan to train a small open-source model (e.g., \texttt{Gemma-2b-it}\cite{gemma_2b_it}) using parameter-efficient fine-tuning such as LoRA\cite{hu2022lora} or PEFT\cite{peft_huggingface} on PII-masking pairs to learn structured redaction. To ensure the model training is computationally feasible, we tested fine-tuning the model on a dummy dataset as part of the Intro to Deep Learning course by MIT (the collab notebook is available at \cite{llm_finetuning_mit}).
+We plan to train a small open-source model (e.g., \texttt{Gemma-2b-it}\cite{gemma_2b_it}) using parameter-efficient fine-tuning such as LoRA\cite{hu2022lora} on PII-masking pairs to learn structured redaction. To ensure the model training is computationally feasible, we tested fine-tuning the model on a dummy dataset as part of the Intro to Deep Learning course by MIT (the collab notebook is available at \cite{llm_finetuning_mit}).
 
 \begin{figure}[h]
     \centering

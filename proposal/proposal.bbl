@@ -25,7 +25,4 @@ Samuel Marks, Johannes Treutlein, Trenton Bricken, Jack Lindsey, Jonathan Marcus
 \newblock Auditing language models for hidden objectives.
 \newblock {\em arXiv preprint arXiv:2503.10965}, 2025.
 
-\bibitem{peft_huggingface}
-Peft on hugging face, 2025.
-
 \end{thebibliography}
