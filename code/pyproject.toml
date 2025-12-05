@@ -1,0 +1,12 @@
+[project]
+name = "code"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "ipykernel>=7.1.0",
+    "sae-dashboard>=0.7.3",
+    "sae-lens>=6.22.3",
+    "transformer-lens>=2.16.1",
+]
