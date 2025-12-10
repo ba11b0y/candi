@@ -58,6 +58,7 @@
 \usepackage{xcolor}
 \usepackage{array}
 \usepackage{graphicx}
+\usepackage{hyperref}
 
 % Use external bibliography file
 
@@ -73,10 +74,10 @@
 
 %for single author (just remove % characters)
 \author{
-{\rm Harith Laxman}\\
+{\rm Rahul Tiwari}\\
 Virginia Tech
 \and
-{\rm Rahul Tiwari}\\
+{\rm Harith Laxman}\\
 Virginia Tech
 % copy the following lines to add more authors
 % \and
@@ -89,31 +90,24 @@ Virginia Tech
 %-------------------------------------------------------------------------------
 \begin{abstract}
 %-------------------------------------------------------------------------------
-Large Language Models (LLMs) have become increasingly capable of performing complex tasks over time. This has led to their widespread integration across diverse fields such as coding, education, legal assistance, and even customer support in the form of AI agents. With their increased adoption, they now have access to vast amounts of data, including sensitive information. Previous research \cite{cywinski2025towards} has shown that certain white-box approaches like mechanistic interpretability can be used to elicit latent knowledge from them. Most work, however, uses model organisms\cite{marks2025auditing} where these LLMs are specifically trained to hold secrets, while in real-world scenarios, these LLMs are not explicitly trained to hold secrets but are instead trained with alignment and privacy-preserving techniques post-training.
+Large Language Models (LLMs) have become more capable at complex tasks, leading to widespread integration across coding, education, legal assistance, and customer support. With increased adoption, they now access vast amounts of sensitive data. Prior work \cite{cywinski2025towards} shows that white-box mechanistic interpretability can elicit latent knowledge, but most studies rely on model organisms \cite{marks2025auditing} explicitly trained to hold secrets. In real scenarios, models are instead aligned and privacy-tuned post-training. This project examines privacy-preserving properties in a realistic setting: a toy model trained for PII redaction on a PII masking dataset, then probed with mechanistic interpretability (activation and circuit analyses) to elicit PII after redaction training. The pipeline includes fine-tuning with LoRA, feature extraction via sparse autoencoders (SAEs), and feature ablation. Results show that ablating a single SAE feature (feature 3867) significantly degrades masking performance and increases PII leakage, demonstrating causal links between interpretable features and privacy behavior. Code: \href{https://github.com/ba11b0y/candi}{https://github.com/ba11b0y/candi}.
 \end{abstract}
 
 
 %------------------------------------------------------------------------------
-%-------------------------------------------------------------------------------
-\section{Proposed Method}
-%-------------------------------------------------------------------------------
+\section{Methodology}
 
-This project aims to study the privacy-preserving properties of LLMs with a real-world application in mind. The idea is to simulate a post-training scenario where a chosen language model is trained on a dataset of text to redact PII (Personally Identifiable Information) and then use techniques from \textit{Mechanistic Interpretability} such as activation analysis (where top activation neurons are examined) and circuit analysis (where a combination of neurons in a vector subspace are analyzed) to see if the model still elicits the PII even after being trained to redact it.
+\subsection{Training}
+The training process employed the Lion optimizer, a recently developed optimization algorithm that has shown improved performance compared to AdamW on various tasks. The learning rate was set to $1\mathrm{e}{-4}$, and gradient accumulation was used with 4 micro-batches to achieve an effective batch size of 8 while maintaining a micro-batch size of 2 per forward pass. Training sequences were truncated to a maximum length of 384 tokens to balance capturing context and computational efficiency. The model was trained for 2{,}000 optimizer steps with gradient accumulation, processing approximately 16{,}000 training examples. Progress was logged every 10 steps.
 
-\begin{figure*}[!h]
-  \centering
-  \includegraphics[width=0.95\textwidth]{diagram.jpg}
-  \caption{High-level overview of the proposed methodology}
-  \label{fig:high_level_overview}
-\end{figure*}
+After training, the LoRA adapter weights were merged into the base model to create a standalone fine-tuned model usable without PEFT. The merged model (about 5GB) and tokenizer were saved for deployment. The base model was \texttt{gpt2-small}; LoRA adapters with rank 8 were attached to transformer layers, reducing trainable parameters to roughly 0.4\% of total. Gradient checkpointing further reduced memory.
 
-\subsection*{Dataset}
-The project aims to build on a subset of the \textbf{AI4Privacy PII Masking Dataset}\cite{ai4privacy_2024}. The dataset contains a large number of text records with PII masked and a sample record from the dataset is shown in Table \ref{table:sample_record}. The dataset is structured as follows:
+The project used a subset of the \textbf{AI4Privacy PII Masking Dataset}\cite{ai4privacy_2024}. A sample record is shown in Table \ref{table:sample_record}. The dataset columns were:
 \begin{itemize}
-  \item \texttt{source\_text}: raw text with embedded PII,
+  \item \texttt{source\_text}: raw text with embedded PII tokens,
   \item \texttt{target\_text}: masked text with placeholders (e.g., [USERNAME], [TIME]),
-  \item \texttt{privacy\_mask} and \texttt{span\_labels}: span-level annotations,
-  \item \texttt{mberttokens} and \texttt{BIO labels} for sequence tagging.
+  \item \texttt{privacy\_mask} and \texttt{span\_labels}: span-level PII annotations,
+  \item \texttt{mberttokens} and BIO labels for sequence tagging.
 \end{itemize}
 
 \begin{table}[h!]
@@ -141,27 +135,73 @@ The project aims to build on a subset of the \textbf{AI4Privacy PII Masking Data
     set & train \\
     \hline
   \end{tabular}
-  \caption{An example record from the PII dataset with sensitive fields highlighted.}
+  \caption{An example record from the ai4privacy dataset with PII tokens highlighted.}
   \label{table:sample_record}
 \end{table}
 
-\subsection*{Training}
-We plan to train a small open-source model (e.g., \texttt{Gemma-2b-it}\cite{gemma_2b_it}) using parameter-efficient fine-tuning such as LoRA\cite{hu2022lora} on PII-masking pairs to learn structured redaction. To ensure the model training is computationally feasible, we tested fine-tuning the model on a dummy dataset as part of the Intro to Deep Learning course by MIT (the collab notebook is available at \cite{llm_finetuning_mit}).
+Training was evaluated with character-level F1, improving by \textbf{6.4\%} over the base model.
 
-%-------------------------------------------------------------------------------
-\section{Timeline}
-%-------------------------------------------------------------------------------
+\subsection{Feature Extraction using Sparse Autoencoders}
+Neural networks can represent more features than neurons, complicating interpretability \cite{monosemantic_features}. Sparse autoencoders (SAEs) help disentangle these features. A pretrained SAE from \texttt{gpt2-small-res-jb} targeted \texttt{blocks.7.hook\_resid\_pre}, expanding the 768-dimensional residual stream to 24{,}576 features (32$\times$). Using \texttt{HookedSAETransformer}, prompts were run with SAE hooks; activations at layer 7 were encoded, and ReLU sparsity ensured only a few features fired per input.
 
-\begin{center}
-  \begin{tabular}{p{0.25\columnwidth}p{0.7\columnwidth}}
-    \textbf{Week 1–2:} & Literature review on PII masking and fine-tuning LLMs.\\
-    \textbf{Week 3–4:} & Dataset preprocessing and LoRA baseline fine-tuning on the subset of the dataset.\\
-    \textbf{Week 5–6:} & Begin activation analysis using logit lens and then circuit analysis.\\
-    \textbf{Week 7–8:} & Conduct experiments and analyze the results.\\
-    \textbf{Week 9:} & Write final report and prepare reproducible code repository.\\
-  \end{tabular}
-\end{center}
+Two contrastive prompts isolated PII-masking features: one with masking instructions (``Mask PII data. Input: My SSN is 637-622-1778 Output: My SSN is'') and one without. Feature differences at the final token identified candidates; feature 3867 showed a difference of 61.69 activation units and was selected for ablation. Maximum activation for feature 3867 was calibrated over 100 training batches (about 32{,}768 tokens) to scale later interventions.
 
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=\columnwidth]{diagrams/activations.drawio.png}
+  \caption{Feature extraction pipeline.}
+  \label{fig:feature_extraction}
+\end{figure}
+
+\subsection{Feature Ablation}
+Feature ablation tested causality between SAE features and PII masking. A forward hook at \texttt{blocks.7.hook\_resid\_pre.hook\_sae\_acts\_post} zeroed the target feature across sequence positions, decoded back through the SAE, and continued the forward pass. Two conditions were run: (1) direct SAE reconstruction (no error correction) and (2) reconstruction plus the SAE error term to mitigate reconstruction loss. The latter isolates the targeted feature while preserving unrelated behavior.
+
+\section{Evaluation}
+
+\subsection{Evaluation Dataset and Metrics}
+Evaluation used 77 test cases across SSNs (26), emails (25), and phone numbers (26). Seventeen were manually crafted with varied prompts (``Mask PII data'', ``Redact sensitive information'', etc.), and 60 came from AI4Privacy (English, $<$300 characters). Metrics:
+\begin{itemize}
+  \item \textbf{Mask Token Rank}: rank of top masking token (lower is better; 0 is top).
+  \item \textbf{PII Token Rank}: rank of first PII token (higher is better).
+  \item \textbf{Logit Difference}: mask logit minus PII logit (positive favors masking).
+  \item \textbf{PII Leakage Rate}: fraction where PII first token is top-10 (lower is better).
+\end{itemize}
+
+\subsection{Experimental Conditions}
+\begin{enumerate}
+  \item \textbf{Baseline}: fine-tuned model without intervention.
+  \item \textbf{Ablated (no error term)}: feature 3867 zeroed; SAE reconstruction replaces activations.
+  \item \textbf{Ablated (with error term)}: feature 3867 zeroed; reconstruction error added back.
+\end{enumerate}
+
+\subsection{Results}
+The baseline model masked PII effectively: average mask token rank 111.2; PII token rank 2194.8; leakage 11.7\%; logit differences positive. Ablating feature 3867 (no error term) degraded masking: mask rank rose to 904.8 (+793.7), PII rank fell to 1021.1 (-1173.7), leakage increased to 28.6\% (2.4$\times$), and logit differences shifted by -7.51, indicating preference for PII over masks.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=\columnwidth]{diagrams/mask_rank.png}
+  \caption{Mask token rank results.}
+  \label{fig:mask_rank}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=\columnwidth]{diagrams/pii_rank.png}
+  \caption{PII token rank results.}
+  \label{fig:pii_rank}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=\columnwidth]{diagrams/leak_rate.png}
+  \caption{PII leakage rate results.}
+  \label{fig:leak_rate}
+\end{figure}
+
+Ablation with error-term correction showed similar but slightly attenuated effects, confirming changes stem from removing feature 3867 rather than SAE reconstruction artifacts. These results provide quantitative evidence that feature 3867 causally supports PII masking; removing a single feature from a 24{,}576-dimensional space substantially degrades privacy-preserving behavior.
+
+\section{Conclusion and Discussion}
+Mechanistic interpretability can probe privacy behavior: activation analysis and SAE-based feature ablation revealed that a single interpretable feature drives PII masking in the fine-tuned model. Ablating it significantly increased PII leakage, highlighting how aligned behaviors can hinge on sparse, discoverable features. A production SAE probe for PII detection \cite{rakuten_sae_probes} suggests that task-specific SAEs may further improve privacy auditing of LLMs.
 
 \bibliographystyle{plain}
 \bibliography{ref}
